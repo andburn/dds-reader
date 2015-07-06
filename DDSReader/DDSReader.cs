@@ -23,7 +23,20 @@ namespace me.andburn.DDSReader
         	DDSImage im = new DDSImage(data);
         	return im.BitmapImage;
         }
-        
+
+		/// <summary>
+		/// Loads a DDS image from a file, and returns a Bitmap object of the image.
+		/// </summary>
+		/// <param name="file">The image file.</param>
+		/// <returns>The Bitmap representation of the image.</returns>
+		public static Bitmap LoadImage(string file)
+		{
+			// TODO: handle exceptions
+			byte[] data = System.IO.File.ReadAllBytes(file);
+			DDSImage im = new DDSImage(data);
+			return im.BitmapImage;
+		}
+
         /// <summary>
         /// "Pings" the library.
         /// </summary>
