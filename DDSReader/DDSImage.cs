@@ -1,125 +1,55 @@
-/*
- * DDSReader
- * Copyright 2006 Michael Farrell 
- * LGPLv2.1
- */
 using System;
 using System.IO;
 using System.Drawing;
 using System.Text;
-#if !SAFE_MODE
-    using System.Drawing.Imaging;
-#endif
+using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using me.andburn.DDSReader.Utils;
 
 namespace me.andburn.DDSReader
 {
-	
-	/// <summary>
-	/// The brand-spankingly new and revamped DDSReader library.
-    /// 
-    /// Now with 100% native .NET goodness.
-    /// 
-    /// This loads a DDS image into an object.  Not much more than that.  At the moment,
-    /// it only supports DXT1 compressed images.  It doesn't support uncompressed
-    /// images yet.
-	/// </summary>
 	public class DDSImage
 	{
-        /*
-         * This class is based on parts of DevIL.net, specifically;
-         * /DevIL-1.6.8/src-IL/src/il_dds.c
-         *
-         * All ported to c#/.net.
-         * 
-         * http://msdn.microsoft.com/library/default.asp?url=/library/en-us/directx9_c/Opaque_and_1_Bit_Alpha_Textures.asp
-         */
-         
         /// <summary>
         /// A space-seperated list of supported image encoders.
         /// </summary>
-        public const String SUPPORTED_ENCODERS = "DXT1 DXT3";
 
-        private static byte[] DDS_HEADER = Convert.FromBase64String("RERTIA=="); // "DDS "
-		
-		// fourccs
-		private const uint FOURCC_DXT1 = 827611204;
-		private const uint FOURCC_DXT2 = 844388420;
-		private const uint FOURCC_DXT3 = 861165636;
-		private const uint FOURCC_DXT4 = 877942852;
-		private const uint FOURCC_DXT5 = 894720068;
-		private const uint FOURCC_ATI1 = 826889281;
-		private const uint FOURCC_ATI2 = 843666497;
-		private const uint FOURCC_RXGB = 1111971922;
-		private const uint FOURCC_DOLLARNULL = 36;
-		private const uint FOURCC_oNULL = 111;
-		private const uint FOURCC_pNULL = 112;
-		private const uint FOURCC_qNULL = 113;
-		private const uint FOURCC_rNULL = 114;
-		private const uint FOURCC_sNULL = 115;
-		private const uint FOURCC_tNULL = 116;
-		
-		
-		// other defines
-		private const uint DDS_LINEARSIZE = 524288;
-		private const uint DDS_PITCH = 8;
-		private const uint DDS_FOURCC = 4;
-		private const uint DDS_LUMINANCE = 131072;
-		private const uint DDS_ALPHAPIXELS = 1;
-		
-		// headers 
-		// DDSURFACEDESC2 structure
-		private byte[] signature;
-		private uint size1;
-		private uint flags1;
-		private uint height;
-		private uint width;
-		private uint linearsize;
-		private uint depth;
-		private uint mipmapcount;
-		private uint alphabitdepth;
-			// DDPIXELFORMAT structure
-			private uint size2;
-			private uint flags2;
-			private uint fourcc;
-			private uint rgbbitcount;
-			private uint rbitmask;
-			private uint bbitmask;
-			private uint gbitmask;
-			private uint alphabitmask;
-		
-			// DDCAPS2 structure
-			private uint ddscaps1;
-			private uint ddscaps2;
-			private uint ddscaps3;
-			private uint ddscaps4;
-			// end DDCAPS2 structure
-		private uint texturestage;
-		// end DDSURFACEDESC2 structure
-		
-		private PixelFormat CompFormat;
-		private uint blocksize;
-		
-		private uint bpp;
-		private uint bps;
-		private uint sizeofplane;
-		private uint compsize;
-		private byte[] compdata;
-		private byte[] rawidata;
-		private BinaryReader br;
-		private Bitmap img;
+		private Bitmap _bitmap;
 
-        /// <summary>
-        /// Returns a System.Imaging.Bitmap containing the DDS image.
-        /// </summary>
-        public Bitmap BitmapImage { get { return this.img; } }
-		
-        /// <summary>
-        /// Constructs a new DDSImage object using the given byte array, which
-        /// contains the raw DDS file.
-        /// </summary>
-        /// <param name="ddsimage">A byte[] containing the DDS file.</param>
-		public DDSImage(byte[] ddsimage)
+		public Bitmap BitmapImage
+		{
+			get { return this._bitmap; }
+		}
+
+		public DDSImage(byte[] ddsImage)
+		{
+			if(ddsImage == null) return;
+			if(ddsImage.Length == 0) return;
+
+			using(MemoryStream stream = new MemoryStream(ddsImage.Length))
+			{
+				stream.Write(ddsImage, 0, ddsImage.Length);
+				stream.Seek(0, SeekOrigin.Begin);
+
+				using(BinaryReader reader = new BinaryReader(stream))
+				{
+					this.Parse(reader);
+				}
+			}
+		}
+
+		public DDSImage(Stream ddsImage)
+		{
+			if(ddsImage == null) return;
+			if(!ddsImage.CanRead) return;
+
+			using(BinaryReader reader = new BinaryReader(ddsImage))
+			{
+				this.Parse(reader);
+			}
+		}
+
+		/*public DDSImage(byte[] ddsimage)
 		{
 			// creates a new DDSImage from a byte[] containing a DDS Image.
 			MemoryStream ms = new MemoryStream(ddsimage.Length);
@@ -197,7 +127,7 @@ namespace me.andburn.DDSReader
 						break;
 					
 					case FOURCC_DXT5:
-						CompFormat = PixelFormat.DTX5;
+						CompFormat = PixelFormat.DXT5;
 						blocksize *= 16;
 						break;
 					
@@ -315,7 +245,11 @@ namespace me.andburn.DDSReader
 				case PixelFormat.DXT3:
 					this.DecompressDXT3();
 					break;
-				
+
+				case PixelFormat.DXT5:
+					this.DecompressDXT5();
+					break;
+
 				default:
 					throw new UnknownFileFormatException();
 			}
@@ -373,285 +307,270 @@ namespace me.andburn.DDSReader
 			
 			
 		}
+		*/
 		
-		private static bool IsByteArrayEqual(byte[] arg0, byte[] arg1) {
-			if (arg0.Length != arg1.Length) {
-				return false;
-			}
-			
-			for (int x=0; x<arg0.Length; x++) {
-				if (arg0[x] != arg1[x]) {
-					return false;
+		private void Parse(BinaryReader reader)
+		{
+			DDSStruct header = new DDSStruct();
+			Utils.PixelFormat pixelFormat = Utils.PixelFormat.UNKNOWN;
+			byte[] data = null;
+
+			if(this.ReadHeader(reader, ref header))
+			{
+				// patches for stuff
+				if(header.depth == 0)
+					header.depth = 1;
+
+				uint blocksize = 0;
+				pixelFormat = this.GetFormat(header, ref blocksize);
+				if(pixelFormat == Utils.PixelFormat.UNKNOWN)
+				{
+					throw new InvalidFileHeaderException();
+				}
+
+				data = this.ReadData(reader, header);
+				if(data != null)
+				{
+					byte[] rawData = Decompressor.Expand(header, data, pixelFormat);
+					_bitmap = this.CreateBitmap((int)header.width, (int)header.height, rawData);
 				}
 			}
-			
-			return true;
 		}
-		
-		// iCompFormatToBpp
-		private uint PixelFormatToBpp(PixelFormat pf) {
-			switch (pf) {
-				case PixelFormat.LUMINANCE:
-				case PixelFormat.LUMINANCE_ALPHA:
-				case PixelFormat.ARGB:
-					return this.rgbbitcount/8;
-				
-				case PixelFormat.RGB:
-				case PixelFormat.THREEDC:
-				case PixelFormat.RXGB:
-					return 3;
-				
-				case PixelFormat.ATI1N:
-					return 1;
-				
-				case PixelFormat.R16F:
-					return 2;
-				
-				case PixelFormat.A16B16G16R16:
-				case PixelFormat.A16B16G16R16F:
-				case PixelFormat.G32R32F:
-					return 8;
-				
-				case PixelFormat.A32B32G32R32F:
-					return 16;
-				
-				default:
-					return 4;
+
+		private byte[] ReadData(BinaryReader reader, DDSStruct header)
+		{
+			byte[] compdata = null;
+			uint compsize = 0;
+
+			if((header.flags & Helper.DDSD_LINEARSIZE) > 1)
+			{
+				compdata = reader.ReadBytes((int)header.sizeorpitch);
+				compsize = (uint)compdata.Length;
 			}
-		}
-		
-		// iCompFormatToBpc
-		private uint PixelFormatToBpc(PixelFormat pf) {
-			switch (pf) {
-				case PixelFormat.R16F:
-				case PixelFormat.G16R16F:
-				case PixelFormat.A16B16G16R16F:
-					return 4;
-				
-				case PixelFormat.R32F:
-				case PixelFormat.G32R32F:
-				case PixelFormat.A32B32G32R32F:
-					return 4;
-				
-				case PixelFormat.A16B16G16R16:
-					return 2;
-				
-				default:
-					return 1;
-			}
-		}
-		
-		// iCompFormatToChannelCount
-		private uint PixelFormatToChannelCount(PixelFormat pf) {
-			switch (pf) {
-				case PixelFormat.RGB:
-				case PixelFormat.THREEDC:
-				case PixelFormat.RXGB:
-					return 3;
-					
-				case PixelFormat.LUMINANCE:
-				case PixelFormat.R16F:
-				case PixelFormat.R32F:
-				case PixelFormat.ATI1N:
-					return 1;
-				
-				case PixelFormat.LUMINANCE_ALPHA:
-				case PixelFormat.G16R16F:
-				case PixelFormat.G32R32F:
-					return 2;
-				
-				default:
-					return 4;
-			}
-		}
-		
-		private void ReadData() {
-			this.compdata = null;
-			
-			if ((this.flags1 & DDS_LINEARSIZE) > 1) {
-				this.compdata = this.br.ReadBytes((int)this.linearsize);
-				this.compsize = (uint)this.compdata.Length;
-			} else {
-				uint bps = this.width * this.rgbbitcount / 8;
-				this.compsize = bps * this.height * this.depth;
-				this.compdata = new byte[this.compsize];
-				
-				MemoryStream mem = new MemoryStream((int)this.compsize);
-				
-				
+			else
+			{
+				uint bps = header.width * header.pixelformat.rgbbitcount / 8;
+				compsize = bps * header.height * header.depth;
+				compdata = new byte[compsize];
+
+				MemoryStream mem = new MemoryStream((int)compsize);
+
 				byte[] temp;
-				for (int z=0; z<this.depth; z++) {
-					for (int y=0; y<this.height; y++) {
-						temp = this.br.ReadBytes((int)this.bps);
+				for(int z = 0; z < header.depth; z++)
+				{
+					for(int y = 0; y < header.height; y++)
+					{
+						temp = reader.ReadBytes((int)bps);
 						mem.Write(temp, 0, temp.Length);
 					}
 				}
 				mem.Seek(0, SeekOrigin.Begin);
-				
-				mem.Read(this.compdata, 0, this.compdata.Length);
+
+				mem.Read(compdata, 0, compdata.Length);
 				mem.Close();
 			}
-		}
-		
-		private void DecompressARGB() {
-			// not done
-            throw new UnknownFileFormatException();
-		}
-		
-		private void DecompressDXT1() {
-			// DXT1 decompressor
-			Colour8888[] colours = new Colour8888[4];
-			
-			
-			ushort colour0, colour1;
-			uint bitmask, offset;
-			int i, j, k, x, y, z, Select;
-			
-			MemoryStream mem = new MemoryStream(this.compdata.Length);
-			mem.Write(this.compdata, 0, this.compdata.Length);
-			mem.Seek(0, SeekOrigin.Begin);
-			BinaryReader r = new BinaryReader(mem);
-			
-			colours[0].a = 255;
-			colours[1].a = 255;
-			colours[2].a = 255;
-			
-			for (z=0; z<this.depth; z++) {
-				for (y=0; y<this.height; y+=4) {
-					for (x=0; x<this.width; x+=4) {
-						colour0 = r.ReadUInt16();
-						colour1 = r.ReadUInt16();
-						
-						this.ReadColour(colour0, ref colours[0]);
-						this.ReadColour(colour1, ref colours[1]);
-						
-						bitmask = r.ReadUInt32();
-						
-						if (colour0 > colour1) {
-							// Four-color block: derive the other two colors.
-							// 00 = color_0, 01 = color_1, 10 = color_2, 11 = color_3
-							// These 2-bit codes correspond to the 2-bit fields
-							// stored in the 64-bit block.
-							colours[2].b = (byte)((2 * colours[0].b + colours[1].b + 1) / 3);
-							colours[2].g = (byte)((2 * colours[0].g + colours[1].g + 1) / 3);
-							colours[2].r = (byte)((2 * colours[0].r + colours[1].r + 1) / 3);
-							
-							colours[3].b = (byte)((colours[0].b + 2 * colours[1].b + 1) / 3);
-							colours[3].g = (byte)((colours[0].g + 2 * colours[1].g + 1) / 3);
-							colours[3].r = (byte)((colours[0].r + 2 * colours[1].r + 1) / 3);
-							colours[3].a = 0xFF;
-						} else {
-							// Three-color block: derive the other color.
-							// 00 = color_0,  01 = color_1,  10 = color_2,
-							// 11 = transparent.
-							// These 2-bit codes correspond to the 2-bit fields 
-							// stored in the 64-bit block. 
-							colours[2].b = (byte)((colours[0].b + colours[1].b) / 2);
-							colours[2].g = (byte)((colours[0].g + colours[1].g) / 2);
-							colours[2].r = (byte)((colours[0].r + colours[1].r) / 2);
 
-                            colours[3].b = 0;
-                            colours[3].g = 0;
-                            colours[3].r = 0;
-							colours[3].a = 0;
-						}
-						
-                        
-						for (j = 0, k = 0; j < 4; j++) {
-							for (i = 0; i < 4; i++, k++) {
-								Select = (int)((bitmask & (0x03 << k*2)) >> k*2);
-								if (((x + i) < this.width) && ((y + j) < this.height)) {
-									offset = (uint)(z * this.sizeofplane + (y + j) * this.bps + (x + i) * this.bpp);
-									this.rawidata[offset] = (byte)colours[Select].r;
-									this.rawidata[offset + 1] = (byte)colours[Select].g;
-									this.rawidata[offset + 2] = (byte)colours[Select].b;
-									this.rawidata[offset + 3] = (byte)colours[Select].a;
-								}
-							}
-						}
+			return compdata;
+		}
 
-                      
-						
-					}
+		// TODO: Removed alpha, add back as option
+		private System.Drawing.Bitmap CreateBitmap(int width, int height, byte[] rawData)
+		{
+			System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppRgb);// .Format32bppArgb);
+
+			BitmapData data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height)
+				, ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format32bppRgb);// .Format32bppArgb);
+			IntPtr scan = data.Scan0;
+			int size = bitmap.Width * bitmap.Height * 4;
+
+			unsafe
+			{
+				byte* p = (byte*)scan;
+				for(int i = 0; i < size; i += 4)
+				{
+					// iterate through bytes.
+					// Bitmap stores it's data in RGBA order.
+					// DDS stores it's data in BGRA order.
+					p[i] = rawData[i + 2]; // blue
+					p[i + 1] = rawData[i + 1]; // green
+					p[i + 2] = rawData[i];   // red
+					p[i + 3] = rawData[i + 3]; // alpha
 				}
 			}
-			
+
+			bitmap.UnlockBits(data);
+			return bitmap;
 		}
-		
-		private void DecompressDXT3() {
-			Colour8888[] colours = new Colour8888[4];
-			uint bitmask, offset;
-			int i, j, k, x, y, z, Select;
-			ushort word, colour0, colour1;
-			byte[] alpha; //temp;
-			
-			MemoryStream mem = new MemoryStream(this.compdata.Length);
-			mem.Write(this.compdata, 0, this.compdata.Length);
-			mem.Seek(0, SeekOrigin.Begin);
-			BinaryReader r = new BinaryReader(mem);
-			
-			for (z=0; z<this.depth; z++) {
-				for (y=0; y<this.height; y+=4) {
-					for (x=0; x<this.width; x+=4) {
-						alpha = r.ReadBytes(8);
-						
-						colour0 = r.ReadUInt16();
-						colour1 = r.ReadUInt16();
-						this.ReadColour(colour0, ref colours[0]);
-						this.ReadColour(colour1, ref colours[1]);
-						
-						bitmask = r.ReadUInt32();
-						
-						colours[2].b = (byte)((2 * colours[0].b + colours[1].b + 1) / 3);
-						colours[2].g = (byte)((2 * colours[0].g + colours[1].g + 1) / 3);
-						colours[2].r = (byte)((2 * colours[0].r + colours[1].r + 1) / 3);
-							
-						colours[3].b = (byte)((colours[0].b + 2 * colours[1].b + 1) / 3);
-						colours[3].g = (byte)((colours[0].g + 2 * colours[1].g + 1) / 3);
-						colours[3].r = (byte)((colours[0].r + 2 * colours[1].r + 1) / 3);
-						
-						for (j = 0, k = 0; j < 4; j++) {
-							for (i = 0; i < 4; k++, i++) {
-								Select = (int)((bitmask & (0x03 << k*2)) >> k*2);
-								
-								if (((x + i) < this.width) && ((y + j) < this.height)) {
-									offset = (uint)(z * this.sizeofplane + (y + j) * this.bps + (x + i) * this.bpp);
-									this.rawidata[offset] = (byte)colours[Select].r;
-									this.rawidata[offset + 1] = (byte)colours[Select].g;
-									this.rawidata[offset + 2] = (byte)colours[Select].b;
-								}
-							}
-						}
-						
-						for (j = 0; j < 4; j++) {
-							word = (ushort)(alpha[2*j] + 256*alpha[2*j+1]);
-							for (i = 0; i < 4; i++) {
-								if (((x + i) < this.width) && ((y + j) < this.height)) {
-									offset = (uint)(z * this.sizeofplane + (y + j) * this.bps + (x + i) * this.bpp + 3);
-									this.rawidata[offset] = (byte)(word & 0x0F);
-									this.rawidata[offset] = (byte)(this.rawidata[offset] | (this.rawidata[offset] << 4));
-								}
-								word >>= 4;
-							}
-						}		
+
+		private bool ReadHeader(BinaryReader reader, ref DDSStruct header)
+		{
+			byte[] signature = reader.ReadBytes(4);
+			if(!(signature[0] == 'D' && signature[1] == 'D' && signature[2] == 'S' && signature[3] == ' '))
+				return false;
+
+			header.size = reader.ReadUInt32();
+			if(header.size != 124)
+				return false;
+
+			//convert the data
+			header.flags = reader.ReadUInt32();
+			header.height = reader.ReadUInt32();
+			header.width = reader.ReadUInt32();
+			header.sizeorpitch = reader.ReadUInt32();
+			header.depth = reader.ReadUInt32();
+			header.mipmapcount = reader.ReadUInt32();
+			header.alphabitdepth = reader.ReadUInt32();
+
+			header.reserved = new uint[10];
+			for(int i = 0; i < 10; i++)
+			{
+				header.reserved[i] = reader.ReadUInt32();
+			}
+
+			//pixelfromat
+			header.pixelformat.size = reader.ReadUInt32();
+			header.pixelformat.flags = reader.ReadUInt32();
+			header.pixelformat.fourcc = reader.ReadUInt32();
+			header.pixelformat.rgbbitcount = reader.ReadUInt32();
+			header.pixelformat.rbitmask = reader.ReadUInt32();
+			header.pixelformat.gbitmask = reader.ReadUInt32();
+			header.pixelformat.bbitmask = reader.ReadUInt32();
+			header.pixelformat.alphabitmask = reader.ReadUInt32();
+
+			//caps
+			header.ddscaps.caps1 = reader.ReadUInt32();
+			header.ddscaps.caps2 = reader.ReadUInt32();
+			header.ddscaps.caps3 = reader.ReadUInt32();
+			header.ddscaps.caps4 = reader.ReadUInt32();
+			header.texturestage = reader.ReadUInt32();
+
+			return true;
+		}
+
+		private Utils.PixelFormat GetFormat(DDSStruct header, ref uint blocksize)
+		{
+			Utils.PixelFormat format = Utils.PixelFormat.UNKNOWN;
+			if((header.pixelformat.flags & Helper.DDPF_FOURCC) == Helper.DDPF_FOURCC)
+			{
+				blocksize = ((header.width + 3) / 4) * ((header.height + 3) / 4) * header.depth;
+
+				switch(header.pixelformat.fourcc)
+				{
+				case Helper.FOURCC_DXT1:
+					format = Utils.PixelFormat.DXT1;
+					blocksize *= 8;
+					break;
+
+				case Helper.FOURCC_DXT2:
+					format = Utils.PixelFormat.DXT2;
+					blocksize *= 16;
+					break;
+
+				case Helper.FOURCC_DXT3:
+					format = Utils.PixelFormat.DXT3;
+					blocksize *= 16;
+					break;
+
+				case Helper.FOURCC_DXT4:
+					format = Utils.PixelFormat.DXT4;
+					blocksize *= 16;
+					break;
+
+				case Helper.FOURCC_DXT5:
+					format = Utils.PixelFormat.DXT5;
+					blocksize *= 16;
+					break;
+
+				case Helper.FOURCC_ATI1:
+					format = Utils.PixelFormat.ATI1N;
+					blocksize *= 8;
+					break;
+
+				case Helper.FOURCC_ATI2:
+					format = Utils.PixelFormat.THREEDC;
+					blocksize *= 16;
+					break;
+
+				case Helper.FOURCC_RXGB:
+					format = Utils.PixelFormat.RXGB;
+					blocksize *= 16;
+					break;
+
+				case Helper.FOURCC_DOLLARNULL:
+					format = Utils.PixelFormat.A16B16G16R16;
+					blocksize = header.width * header.height * header.depth * 8;
+					break;
+
+				case Helper.FOURCC_oNULL:
+					format = Utils.PixelFormat.R16F;
+					blocksize = header.width * header.height * header.depth * 2;
+					break;
+
+				case Helper.FOURCC_pNULL:
+					format = Utils.PixelFormat.G16R16F;
+					blocksize = header.width * header.height * header.depth * 4;
+					break;
+
+				case Helper.FOURCC_qNULL:
+					format = Utils.PixelFormat.A16B16G16R16F;
+					blocksize = header.width * header.height * header.depth * 8;
+					break;
+
+				case Helper.FOURCC_rNULL:
+					format = Utils.PixelFormat.R32F;
+					blocksize = header.width * header.height * header.depth * 4;
+					break;
+
+				case Helper.FOURCC_sNULL:
+					format = Utils.PixelFormat.G32R32F;
+					blocksize = header.width * header.height * header.depth * 8;
+					break;
+
+				case Helper.FOURCC_tNULL:
+					format = Utils.PixelFormat.A32B32G32R32F;
+					blocksize = header.width * header.height * header.depth * 16;
+					break;
+
+				default:
+					format = Utils.PixelFormat.UNKNOWN;
+					blocksize *= 16;
+					break;
+				} // switch
+			}
+			else
+			{
+				// uncompressed image
+				if((header.pixelformat.flags & Helper.DDPF_LUMINANCE) == Helper.DDPF_LUMINANCE)
+				{
+					if((header.pixelformat.flags & Helper.DDPF_ALPHAPIXELS) == Helper.DDPF_ALPHAPIXELS)
+					{
+						format = Utils.PixelFormat.LUMINANCE_ALPHA;
+					}
+					else
+					{
+						format = Utils.PixelFormat.LUMINANCE;
 					}
 				}
-			}					
-		}
-		
-		private void ReadColour(ushort Data, ref Colour8888 op)
-		{
-			byte r, g, b;
+				else
+				{
+					if((header.pixelformat.flags & Helper.DDPF_ALPHAPIXELS) == Helper.DDPF_ALPHAPIXELS)
+					{
+						format = Utils.PixelFormat.ARGB;
+					}
+					else
+					{
+						format = Utils.PixelFormat.RGB;
+					}
+				}
 
-			b = (byte)(Data & 0x1f);
-			g = (byte)((Data & 0x7E0) >> 5);
-			r = (byte)((Data & 0xF800) >> 11);
+				blocksize = (header.width * header.height * header.depth * (header.pixelformat.rgbbitcount >> 3));
+			}
 
-            op.r = (byte)(r * 255 / 31);
-            op.g = (byte)(g * 255 / 63);
-            op.b = (byte)(b * 255 / 31);
+			return format;
 		}
-		
+
+
+
 		// uncomment this to make debugging easier
 		/*
 		private static String ConvertToHex(byte[] input) {

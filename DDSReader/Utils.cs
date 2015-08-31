@@ -366,7 +366,7 @@ namespace me.andburn.DDSReader.Utils
 	}
 
 	[StructLayout(LayoutKind.Sequential)]
-	struct Colour8888
+	public struct Colour8888
 	{
 		public byte red;
 		public byte green;
@@ -375,7 +375,7 @@ namespace me.andburn.DDSReader.Utils
 	}
 
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-	struct Colour565
+	public struct Colour565
 	{
 		public ushort blue; //: 5;
 		public ushort green; //: 6;
@@ -383,7 +383,7 @@ namespace me.andburn.DDSReader.Utils
 	}
 
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-	private struct DDSStruct
+	public struct DDSStruct
 	{
 		public uint size;		// equals size of struct (which is part of the data file!)
 		public uint flags;
@@ -435,7 +435,7 @@ namespace me.andburn.DDSReader.Utils
 		//#endif
 	}
 
-	enum PixelFormat
+	public enum PixelFormat
 	{
 		ARGB,
 		RGB,

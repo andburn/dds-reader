@@ -7,7 +7,7 @@ namespace me.andburn.DDSReader
 {
 	public class Decompressor
 	{
-		public byte[] Expand(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		public static byte[] Expand(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			System.Diagnostics.Debug.WriteLine(pixelFormat);
 			
@@ -16,48 +16,48 @@ namespace me.andburn.DDSReader
 			switch(pixelFormat)
 			{
 			case PixelFormat.ARGB:
-				rawData = this.DecompressRGBA(header, data, pixelFormat);
+				rawData = DecompressRGBA(header, data, pixelFormat);
 				break;
 
 			case PixelFormat.RGB:
-				rawData = this.DecompressRGB(header, data, pixelFormat);
+				rawData = DecompressRGB(header, data, pixelFormat);
 				break;
 
 			case PixelFormat.LUMINANCE:
 			case PixelFormat.LUMINANCE_ALPHA:
-				rawData = this.DecompressLum(header, data, pixelFormat);
+				rawData = DecompressLum(header, data, pixelFormat);
 				break;
 
 			case PixelFormat.DXT1:
-				rawData = this.DecompressDXT1(header, data, pixelFormat);
+				rawData = DecompressDXT1(header, data, pixelFormat);
 				break;
 
 			case PixelFormat.DXT2:
-				rawData = this.DecompressDXT2(header, data, pixelFormat);
+				rawData = DecompressDXT2(header, data, pixelFormat);
 				break;
 
 			case PixelFormat.DXT3:
-				rawData = this.DecompressDXT3(header, data, pixelFormat);
+				rawData = DecompressDXT3(header, data, pixelFormat);
 				break;
 
 			case PixelFormat.DXT4:
-				rawData = this.DecompressDXT3(header, data, pixelFormat);
+				rawData = DecompressDXT3(header, data, pixelFormat);
 				break;
 
 			case PixelFormat.DXT5:
-				rawData = this.DecompressDXT5(header, data, pixelFormat);
+				rawData = DecompressDXT5(header, data, pixelFormat);
 				break;
 
 			case PixelFormat.THREEDC:
-				rawData = this.Decompress3Dc(header, data, pixelFormat);
+				rawData = Decompress3Dc(header, data, pixelFormat);
 				break;
 
 			case PixelFormat.ATI1N:
-				rawData = this.DecompressAti1n(header, data, pixelFormat);
+				rawData = DecompressAti1n(header, data, pixelFormat);
 				break;
 
 			case PixelFormat.RXGB:
-				rawData = this.DecompressRXGB(header, data, pixelFormat);
+				rawData = DecompressRXGB(header, data, pixelFormat);
 				break;
 
 			case PixelFormat.R16F:
@@ -66,7 +66,7 @@ namespace me.andburn.DDSReader
 			case PixelFormat.R32F:
 			case PixelFormat.G32R32F:
 			case PixelFormat.A32B32G32R32F:
-				rawData = this.DecompressFloat(header, data, pixelFormat);
+				rawData = DecompressFloat(header, data, pixelFormat);
 				break;
 
 			default:
@@ -76,7 +76,7 @@ namespace me.andburn.DDSReader
 			return rawData;
 		}
 
-		private byte[] DecompressDXT2(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		private static byte[] DecompressDXT2(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			// allocate bitmap
 			int width = (int)header.width;
@@ -91,7 +91,7 @@ namespace me.andburn.DDSReader
 			return rawData;
 		}
 
-		private byte[] DecompressDXT4(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		private static byte[] DecompressDXT4(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			// allocate bitmap
 			int width = (int)header.width;
@@ -106,7 +106,7 @@ namespace me.andburn.DDSReader
 			return rawData;
 		}
 
-		private unsafe byte[] DecompressDXT1(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		private static unsafe byte[] DecompressDXT1(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			// allocate bitmap
 			int bpp = (int)(Helper.PixelFormatToBpp(pixelFormat, header.pixelformat.rgbbitcount));
@@ -204,7 +204,7 @@ namespace me.andburn.DDSReader
 			return rawData;
 		}
 		
-		private unsafe byte[] DecompressDXT3(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		private static unsafe byte[] DecompressDXT3(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			// allocate bitmap
 			int bpp = (int)(Helper.PixelFormatToBpp(pixelFormat, header.pixelformat.rgbbitcount));
@@ -293,7 +293,7 @@ namespace me.andburn.DDSReader
 			return rawData;
 		}
 
-		private unsafe byte[] DecompressDXT5(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		private static unsafe byte[] DecompressDXT5(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			// allocate bitmap
 			int bpp = (int)(Helper.PixelFormatToBpp(pixelFormat, header.pixelformat.rgbbitcount));
@@ -365,7 +365,7 @@ namespace me.andburn.DDSReader
 									}
 								}
 							}
-
+							
 							// 8-alpha or 6-alpha block?
 							if(alphas[0] > alphas[1])
 							{
@@ -389,10 +389,10 @@ namespace me.andburn.DDSReader
 								alphas[6] = 0x00; // Bit code 110
 								alphas[7] = 0xFF; // Bit code 111
 							}
-
+							
 							// Note: Have to separate the next two loops,
 							// it operates on a 6-byte system.
-
+							
 							// First three bytes
 							bits = (ushort)((alphamask[0]) | (alphamask[1] << 8) | (alphamask[2] << 16));
 							for(j = 0; j < 2; j++)
@@ -423,7 +423,7 @@ namespace me.andburn.DDSReader
 									}
 									bits >>= 3;
 								}
-							}
+							}							
 						}
 					}
 				}
@@ -432,7 +432,7 @@ namespace me.andburn.DDSReader
 			return rawData;
 		}
 
-		private unsafe byte[] DecompressRGB(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		private static unsafe byte[] DecompressRGB(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			// allocate bitmap
 			int bpp = (int)(Helper.PixelFormatToBpp(pixelFormat, header.pixelformat.rgbbitcount));
@@ -475,7 +475,7 @@ namespace me.andburn.DDSReader
 			return rawData;
 		}
 
-		private unsafe byte[] DecompressRGBA(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		private static unsafe byte[] DecompressRGBA(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			// allocate bitmap
 			int bpp = (int)(Helper.PixelFormatToBpp(pixelFormat, header.pixelformat.rgbbitcount));
@@ -523,7 +523,7 @@ namespace me.andburn.DDSReader
 			return rawData;
 		}
 
-		private unsafe byte[] Decompress3Dc(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		private static unsafe byte[] Decompress3Dc(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			// allocate bitmap
 			int bpp = (int)(Helper.PixelFormatToBpp(pixelFormat, header.pixelformat.rgbbitcount));
@@ -636,7 +636,7 @@ namespace me.andburn.DDSReader
 			return rawData;
 		}
 
-		private unsafe byte[] DecompressAti1n(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		private static unsafe byte[] DecompressAti1n(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			// allocate bitmap
 			int bpp = (int)(Helper.PixelFormatToBpp(pixelFormat, header.pixelformat.rgbbitcount));
@@ -711,7 +711,7 @@ namespace me.andburn.DDSReader
 			return rawData;
 		}
 
-		private unsafe byte[] DecompressLum(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		private static unsafe byte[] DecompressLum(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			// allocate bitmap
 			int bpp = (int)(Helper.PixelFormatToBpp(pixelFormat, header.pixelformat.rgbbitcount));
@@ -744,7 +744,7 @@ namespace me.andburn.DDSReader
 			return rawData;
 		}
 
-		private unsafe byte[] DecompressRXGB(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		private static unsafe byte[] DecompressRXGB(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			// allocate bitmap
 			int bpp = (int)(Helper.PixelFormatToBpp(pixelFormat, header.pixelformat.rgbbitcount));
@@ -896,7 +896,7 @@ namespace me.andburn.DDSReader
 			return rawData;
 		}
 
-		private unsafe byte[] DecompressFloat(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		private static unsafe byte[] DecompressFloat(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			// allocate bitmap
 			int bpp = (int)(Helper.PixelFormatToBpp(pixelFormat, header.pixelformat.rgbbitcount));
@@ -964,7 +964,7 @@ namespace me.andburn.DDSReader
 			return rawData;
 		}
 
-		private unsafe byte[] DecompressARGB(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		private static unsafe byte[] DecompressARGB(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			// allocate bitmap
 			int bpp = (int)(Helper.PixelFormatToBpp(pixelFormat, header.pixelformat.rgbbitcount));
@@ -1063,7 +1063,7 @@ namespace me.andburn.DDSReader
 			return rawData;
 		}
 
-		private unsafe byte[] DecompressARGB16(DDSStruct header, byte[] data, PixelFormat pixelFormat)
+		private static unsafe byte[] DecompressARGB16(DDSStruct header, byte[] data, PixelFormat pixelFormat)
 		{
 			// allocate bitmap
 			int bpp = (int)(Helper.PixelFormatToBpp(pixelFormat, header.pixelformat.rgbbitcount));

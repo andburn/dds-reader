@@ -107,7 +107,7 @@
             DXT-4 Compression
             </summary>
         </member>
-        <member name="F:me.andburn.DDSReader.PixelFormat.DTX5">
+        <member name="F:me.andburn.DDSReader.PixelFormat.DXT5">
             <summary>
             DXT-5 Compression
             </summary>

@@ -10,14 +10,13 @@ namespace me.andburn.DDSReaderTest
 	public class SimpleTest
 	{
 		[TestMethod]
-		[ExpectedException(typeof(UnknownFileFormatException))]
 		public void DXT5NotSupported()
 		{
 			byte[] data = File.ReadAllBytes(@"..\..\..\Data\DXT5.dds");
 			
 			Bitmap bmp = DDSReader.DDSReader.LoadImage(data);
-			
-			// Assert - to be an exception
+			bmp.Save(@"..\..\..\Data\DXT5_out.bmp");
+			Assert.IsFalse(bmp.Size.IsEmpty);
 		}
 
 		[TestMethod]
@@ -26,6 +25,7 @@ namespace me.andburn.DDSReaderTest
 			byte[] data = File.ReadAllBytes(@"..\..\..\Data\DXT1.dds");
 
 			Bitmap bmp = DDSReader.DDSReader.LoadImage(data);
+			bmp.Save(@"..\..\..\Data\DXT1_out.bmp");
 
 			Assert.IsFalse(bmp.Size.IsEmpty);
 		}
