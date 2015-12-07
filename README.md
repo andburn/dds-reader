@@ -1,11 +1,6 @@
 # DDS Reader
 A DDS reader in C#, extracted and refactored from [igaeditor](https://github.com/micolous/igaeditor).
-
-### TODO
-- test speed of unsafe and safe mode on current CLR
-- this [gist](https://gist.github.com/soeminnminn/e9c4c99867743a717f5b) seems to be built upon this library
-- could also add some of [MonoGame](https://github.com/mono/MonoGame/blob/develop/MonoGame.Framework/Graphics/DxtUtil.cs).
-
+With updates found in this [gist](https://gist.github.com/soeminnminn/e9c4c99867743a717f5b), to cater for more formats.
 
 ----
 ### Original Readme
