@@ -1,33 +1,31 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using me.andburn.DDSReader;
+﻿using System.Drawing;
 using System.IO;
-using System.Drawing;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace me.andburn.DDSReaderTest
+namespace AndBurn.DDSReaderTest
 {
-	[TestClass]
-	public class SimpleTest
-	{
-		[TestMethod]
-		public void DXT5NotSupported()
-		{
-			byte[] data = File.ReadAllBytes(@"..\..\..\Data\DXT5.dds");
-			
-			Bitmap bmp = DDSReader.DDSReader.LoadImage(data);
-			bmp.Save(@"..\..\..\Data\DXT5_out.bmp");
-			Assert.IsFalse(bmp.Size.IsEmpty);
-		}
+    [TestClass]
+    public class SimpleTest
+    {
+        [TestMethod]
+        public void DXT5NotSupported()
+        {
+            byte[] data = File.ReadAllBytes(@"..\..\..\Data\DXT5.dds");
 
-		[TestMethod]
-		public void DXT1Supported()
-		{
-			byte[] data = File.ReadAllBytes(@"..\..\..\Data\DXT1.dds");
+            Bitmap bmp = DDSReader.DDSReader.LoadImage(data);
+            bmp.Save(@"..\..\..\Data\DXT5_out.bmp");
+            Assert.IsFalse(bmp.Size.IsEmpty);
+        }
 
-			Bitmap bmp = DDSReader.DDSReader.LoadImage(data);
-			bmp.Save(@"..\..\..\Data\DXT1_out.bmp");
+        [TestMethod]
+        public void DXT1Supported()
+        {
+            byte[] data = File.ReadAllBytes(@"..\..\..\Data\DXT1.dds");
 
-			Assert.IsFalse(bmp.Size.IsEmpty);
-		}
-	}
+            Bitmap bmp = DDSReader.DDSReader.LoadImage(data);
+            bmp.Save(@"..\..\..\Data\DXT1_out.bmp");
+
+            Assert.IsFalse(bmp.Size.IsEmpty);
+        }
+    }
 }

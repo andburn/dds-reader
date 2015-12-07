@@ -8,7 +8,7 @@
     <ProjectGuid>{E8E2E010-DA59-4A99-8331-B986B84C0FD2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>me.andburn.DDSReader</RootNamespace>
+    <RootNamespace>AndBurn.DDSReader</RootNamespace>
     <AssemblyName>DDSReader</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileUpgradeFlags>
