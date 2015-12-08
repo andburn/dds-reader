@@ -6,7 +6,7 @@ namespace AndBurn.DDSReader
     /// <summary>
     /// This is the main class of the library.  All static methods are contained within.
     /// </summary>
-    public static class DDSReader
+    public static class DDS
     {
         /// <summary>
         /// Loads a DDS image from a byte array, and returns a Bitmap object of the image.
@@ -29,7 +29,6 @@ namespace AndBurn.DDSReader
         /// <returns>The Bitmap representation of the image.</returns>
         public static Bitmap LoadImage(string file, bool alpha = true)
         {
-            // TODO: handle exceptions
             byte[] data = File.ReadAllBytes(file);
             DDSImage im = new DDSImage(data);
             im.PreserveAlpha = alpha;

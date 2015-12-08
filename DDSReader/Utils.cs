@@ -431,19 +431,6 @@ namespace AndBurn.DDSReader.Utils
 
         public ddscapsstruct ddscaps;
         public uint texturestage;
-
-        //#ifndef __i386__
-        //void to_little_endian()
-        //{
-        //	size_t size = sizeof(DDSStruct);
-        //	assert(size % 4 == 0);
-        //	size /= 4;
-        //	for (size_t i=0; i<size; i++)
-        //	{
-        //		((int32_t*) this)[i] = little_endian(((int32_t*) this)[i]);
-        //	}
-        //}
-        //#endif
     }
 
     public enum PixelFormat

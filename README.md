@@ -2,6 +2,16 @@
 A DDS reader in C#, extracted and refactored from [igaeditor](https://github.com/micolous/igaeditor).
 With updates found in this [gist](https://gist.github.com/soeminnminn/e9c4c99867743a717f5b), to cater for more formats.
 
+## Usage
+
+The main function of the library is to read a DDS image and convert it to a `System.Drawing.Bitmap` object, 
+using the `LoadImage` method of the `DDS` class.
+It can be used by simply supplying the file path as a string argument.
+```
+Bitmap bmp = DDS.LoadImage(@".\textures\sample.dds");
+```
+Overloaded versions of `LoadImage` exist to load from a `byte` array as well as from a `Stream`.
+
 ----
 ### Original Readme
 

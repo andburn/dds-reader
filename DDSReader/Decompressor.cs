@@ -3,7 +3,7 @@ using AndBurn.DDSReader.Utils;
 
 namespace AndBurn.DDSReader
 {
-    public class Decompressor
+    internal class Decompressor
     {
         public static byte[] Expand(DDSStruct header, byte[] data, PixelFormat pixelFormat)
         {

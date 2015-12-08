@@ -61,7 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DDSImage.cs" />
-    <Compile Include="DDSReader.cs" />
+    <Compile Include="DDS.cs" />
     <Compile Include="Decompressor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Exceptions.cs" />
