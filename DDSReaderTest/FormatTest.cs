@@ -33,6 +33,20 @@ namespace AndBurn.DDSReaderTest
         }
 
         [TestMethod]
+        public void PreserveAlphaChannel_DefaultsTrue()
+        {
+            DDSImage im = new DDSImage(File.Open(@"Data\DXT5_Alpha.dds", FileMode.Open));
+            Assert.IsTrue(im.PreserveAlpha);
+        }
+
+        [TestMethod]
+        public void PreserveAlphaChannel_IsFalse()
+        {
+            DDSImage im = new DDSImage(File.Open(@"Data\DXT5_Alpha.dds", FileMode.Open), false);
+            Assert.IsFalse(im.PreserveAlpha);
+        }
+
+        [TestMethod]
         public void PNGNotSupported()
         {
             Bitmap bmp = DDS.LoadImage(@"Data\CRED.png");

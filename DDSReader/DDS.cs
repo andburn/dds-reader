@@ -16,8 +16,7 @@ namespace AndBurn.DDSReader
         /// <returns>The Bitmap representation of the image.</returns>
         public static Bitmap LoadImage(byte[] data, bool alpha = true)
         {
-            DDSImage im = new DDSImage(data);
-            im.PreserveAlpha = alpha;
+            DDSImage im = new DDSImage(data, alpha);
             return im.BitmapImage;
         }
 
@@ -30,8 +29,7 @@ namespace AndBurn.DDSReader
         public static Bitmap LoadImage(string file, bool alpha = true)
         {
             byte[] data = File.ReadAllBytes(file);
-            DDSImage im = new DDSImage(data);
-            im.PreserveAlpha = alpha;
+            DDSImage im = new DDSImage(data, alpha);
             return im.BitmapImage;
         }
 
@@ -43,8 +41,7 @@ namespace AndBurn.DDSReader
         /// <returns>The Bitmap representation of the image.</returns>
         public static Bitmap LoadImage(Stream stream, bool alpha = true)
         {
-            DDSImage im = new DDSImage(stream);
-            im.PreserveAlpha = alpha;
+            DDSImage im = new DDSImage(stream, alpha);
             return im.BitmapImage;
         }
     }

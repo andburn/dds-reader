@@ -23,7 +23,7 @@ namespace AndBurn.DDSReader
             set { _alpha = value; }
         }
 
-        public DDSImage(byte[] ddsImage)
+        public DDSImage(byte[] ddsImage, bool preserveAlpha = true)
         {
             if (ddsImage == null)
                 return;
@@ -31,7 +31,7 @@ namespace AndBurn.DDSReader
             if (ddsImage.Length == 0)
                 return;
 
-            _alpha = true;
+            _alpha = preserveAlpha;
 
             using (MemoryStream stream = new MemoryStream(ddsImage.Length))
             {
@@ -45,7 +45,7 @@ namespace AndBurn.DDSReader
             }
         }
 
-        public DDSImage(Stream ddsImage)
+        public DDSImage(Stream ddsImage, bool preserveAlpha = true)
         {
             if (ddsImage == null)
                 return;
@@ -53,7 +53,7 @@ namespace AndBurn.DDSReader
             if (!ddsImage.CanRead)
                 return;
 
-            _alpha = true;
+            _alpha = preserveAlpha;
 
             using (BinaryReader reader = new BinaryReader(ddsImage))
             {
