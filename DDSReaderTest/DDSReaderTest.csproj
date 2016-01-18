@@ -61,19 +61,19 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Data\CRED.png">
+    <Content Include="Data\sample.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Data\DXT1.dds">
+    <Content Include="Data\sample.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Data\DXT3.dds">
+    <Content Include="Data\sample_dxt1.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Data\DXT5.dds">
+    <Content Include="Data\sample_dxt3.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Data\DXT5_Alpha.dds">
+    <Content Include="Data\sample_dxt5.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
