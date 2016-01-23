@@ -64,7 +64,6 @@
     <Compile Include="DDS.cs" />
     <Compile Include="Decompressor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Exceptions.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
