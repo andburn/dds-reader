@@ -58,29 +58,17 @@ namespace AndBurn.DDSReader.Utils
 
 		#endregion Constants
 
-		private static void ConvertRgb565ToRgb888(ushort color, out byte r, out byte g, out byte b)
-		{
-			int temp;
-
-			temp = (color >> 11) * 255 + 16;
-			r = (byte)((temp / 32 + temp) / 32);
-			temp = ((color & 0x07E0) >> 5) * 255 + 32;
-			g = (byte)((temp / 64 + temp) / 64);
-			temp = (color & 0x001F) * 255 + 16;
-			b = (byte)((temp / 32 + temp) / 32);
-		}
-
 		// iCompFormatToBpp
-		public static uint PixelFormatToBpp(PixelFormat pf, uint rgbbitcount)
+		internal static uint PixelFormatToBpp(PixelFormat pf, uint rgbbitcount)
 		{
 			switch(pf)
 			{
 				case PixelFormat.LUMINANCE:
 				case PixelFormat.LUMINANCE_ALPHA:
-				case PixelFormat.ARGB:
+				case PixelFormat.RGBA:
+				case PixelFormat.RGB:
 					return rgbbitcount / 8;
 
-				case PixelFormat.RGB:
 				case PixelFormat.THREEDC:
 				case PixelFormat.RXGB:
 					return 3;
@@ -105,7 +93,7 @@ namespace AndBurn.DDSReader.Utils
 		}
 
 		// iCompFormatToBpc
-		public static uint PixelFormatToBpc(PixelFormat pf)
+		internal static uint PixelFormatToBpc(PixelFormat pf)
 		{
 			switch(pf)
 			{
@@ -127,7 +115,7 @@ namespace AndBurn.DDSReader.Utils
 			}
 		}
 
-		public static bool Check16BitComponents(DDSStruct header)
+		internal static bool Check16BitComponents(DDSStruct header)
 		{
 			if(header.pixelformat.rgbbitcount != 32)
 				return false;
@@ -143,7 +131,7 @@ namespace AndBurn.DDSReader.Utils
 			return false;
 		}
 
-		public static void CorrectPremult(uint pixnum, ref byte[] buffer)
+		internal static void CorrectPremult(uint pixnum, ref byte[] buffer)
 		{
 			for(uint i = 0; i < pixnum; i++)
 			{
@@ -159,7 +147,7 @@ namespace AndBurn.DDSReader.Utils
 			}
 		}
 
-		public static void ComputeMaskParams(uint mask, ref int shift1, ref int mul, ref int shift2)
+		internal static void ComputeMaskParams(uint mask, ref int shift1, ref int mul, ref int shift2)
 		{
 			shift1 = 0; mul = 1; shift2 = 0;
 			while((mask & 1) == 0)
@@ -180,7 +168,7 @@ namespace AndBurn.DDSReader.Utils
 			}
 		}
 
-		public static unsafe void DxtcReadColors(byte* data, ref Colour8888[] op)
+		internal static unsafe void DxtcReadColors(byte* data, ref Colour8888[] op)
 		{
 			byte r0, g0, b0, r1, g1, b1;
 
@@ -201,7 +189,7 @@ namespace AndBurn.DDSReader.Utils
 			op[1].blue = (byte)(b1 << 3 | b1 >> 2);
 		}
 
-		public static void DxtcReadColor(ushort data, ref Colour8888 op)
+		internal static void DxtcReadColor(ushort data, ref Colour8888 op)
 		{
 			byte r, g, b;
 
@@ -214,7 +202,7 @@ namespace AndBurn.DDSReader.Utils
 			op.blue = (byte)(b << 3 | r >> 2);
 		}
 
-		public static unsafe void DxtcReadColors(byte* data, ref Colour565 color_0, ref Colour565 color_1)
+		internal static unsafe void DxtcReadColors(byte* data, ref Colour565 color_0, ref Colour565 color_1)
 		{
 			color_0.blue = (byte)(data[0] & 0x1F);
 			color_0.green = (byte)(((data[0] & 0xE0) >> 5) | ((data[1] & 0x7) << 3));
@@ -225,7 +213,7 @@ namespace AndBurn.DDSReader.Utils
 			color_0.red = (byte)((data[3] & 0xF8) >> 3);
 		}
 
-		public static void GetBitsFromMask(uint mask, ref uint shiftLeft, ref uint shiftRight)
+		internal static void GetBitsFromMask(uint mask, ref uint shiftLeft, ref uint shiftRight)
 		{
 			uint temp, i;
 
@@ -250,12 +238,10 @@ namespace AndBurn.DDSReader.Utils
 					break;
 			}
 			shiftLeft = 8 - i;
-
-			return;
 		}
 
 		// This function simply counts how many contiguous bits are in the mask.
-		public static uint CountBitsFromMask(uint mask)
+		internal static uint CountBitsFromMask(uint mask)
 		{
 			uint i, testBit = 0x01, count = 0;
 			bool foundBit = false;
@@ -275,7 +261,7 @@ namespace AndBurn.DDSReader.Utils
 			return count;
 		}
 
-		public static uint HalfToFloat(ushort y)
+		internal static uint HalfToFloat(ushort y)
 		{
 			int s = (y >> 15) & 0x00000001;
 			int e = (y >> 10) & 0x0000001f;
@@ -335,7 +321,7 @@ namespace AndBurn.DDSReader.Utils
 			return (uint)((s << 31) | (e << 23) | m);
 		}
 
-		public static unsafe void ConvFloat16ToFloat32(uint* dest, ushort* src, uint size)
+		internal static unsafe void ConvFloat16ToFloat32(uint* dest, ushort* src, uint size)
 		{
 			uint i;
 			for(i = 0; i < size; ++i, ++dest, ++src)
@@ -346,7 +332,7 @@ namespace AndBurn.DDSReader.Utils
 			}
 		}
 
-		public static unsafe void ConvG16R16ToFloat32(uint* dest, ushort* src, uint size)
+		internal static unsafe void ConvG16R16ToFloat32(uint* dest, ushort* src, uint size)
 		{
 			uint i;
 			for(i = 0; i < size; i += 3)
@@ -359,7 +345,7 @@ namespace AndBurn.DDSReader.Utils
 			}
 		}
 
-		public static unsafe void ConvR16ToFloat32(uint* dest, ushort* src, uint size)
+		internal static unsafe void ConvR16ToFloat32(uint* dest, ushort* src, uint size)
 		{
 			uint i;
 			for(i = 0; i < size; i += 3)
@@ -435,7 +421,7 @@ namespace AndBurn.DDSReader.Utils
 
 	public enum PixelFormat
 	{
-		ARGB,
+		RGBA,
 		RGB,
 		DXT1,
 		DXT2,

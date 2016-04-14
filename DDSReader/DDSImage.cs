@@ -1,20 +1,24 @@
 using System;
-using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using AndBurn.DDSReader.Utils;
-using DrawingPixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace AndBurn.DDSReader
 {
-	public class DDSImage
+	public class DDSImage : IDisposable
 	{
-		private Bitmap _bitmap;
+		private System.Drawing.Bitmap _bitmap;
+		private bool _isValid;
 		private bool _alpha;
 
-		public Bitmap BitmapImage
+		public System.Drawing.Bitmap BitmapImage
 		{
-			get { return this._bitmap; }
+			get { return _bitmap; }
+		}
+
+		public bool IsValid
+		{
+			get { return _isValid; }
 		}
 
 		public bool PreserveAlpha
@@ -40,7 +44,7 @@ namespace AndBurn.DDSReader
 
 				using(BinaryReader reader = new BinaryReader(stream))
 				{
-					this.Parse(reader);
+					Parse(reader);
 				}
 			}
 		}
@@ -57,7 +61,16 @@ namespace AndBurn.DDSReader
 
 			using(BinaryReader reader = new BinaryReader(ddsImage))
 			{
-				this.Parse(reader);
+				Parse(reader);
+			}
+		}
+
+		public void Dispose()
+		{
+			if(_bitmap != null)
+			{
+				_bitmap.Dispose();
+				_bitmap = null;
 			}
 		}
 
@@ -67,24 +80,24 @@ namespace AndBurn.DDSReader
 			Utils.PixelFormat pixelFormat = Utils.PixelFormat.UNKNOWN;
 			byte[] data = null;
 
-			if(this.ReadHeader(reader, ref header))
+			if(ReadHeader(reader, ref header))
 			{
+				_isValid = true;
 				// patches for stuff
-				if(header.depth == 0)
-					header.depth = 1;
+				if(header.depth == 0) header.depth = 1;
 
 				uint blocksize = 0;
-				pixelFormat = this.GetFormat(header, ref blocksize);
+				pixelFormat = GetFormat(header, ref blocksize);
 				if(pixelFormat == Utils.PixelFormat.UNKNOWN)
 				{
 					throw new InvalidFileHeaderException();
 				}
 
-				data = this.ReadData(reader, header);
+				data = ReadData(reader, header);
 				if(data != null)
 				{
 					byte[] rawData = Decompressor.Expand(header, data, pixelFormat);
-					_bitmap = this.CreateBitmap((int)header.width, (int)header.height, rawData);
+					_bitmap = CreateBitmap((int)header.width, (int)header.height, rawData);
 				}
 			}
 		}
@@ -125,16 +138,16 @@ namespace AndBurn.DDSReader
 			return compdata;
 		}
 
-		private Bitmap CreateBitmap(int width, int height, byte[] rawData)
+		private System.Drawing.Bitmap CreateBitmap(int width, int height, byte[] rawData)
 		{
-			var pixelFormat = DrawingPixelFormat.Format32bppRgb;
+			var pxFormat = System.Drawing.Imaging.PixelFormat.Format32bppRgb;
 			if(_alpha)
-				pixelFormat = DrawingPixelFormat.Format32bppArgb;
+				pxFormat = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
 
-			Bitmap bitmap = new Bitmap(width, height, pixelFormat);
+			System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(width, height, pxFormat);
 
-			Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
-			BitmapData data = bitmap.LockBits(rect, ImageLockMode.WriteOnly, pixelFormat);
+			BitmapData data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height)
+				, ImageLockMode.WriteOnly, pxFormat);
 			IntPtr scan = data.Scan0;
 			int size = bitmap.Width * bitmap.Height * 4;
 
@@ -290,7 +303,7 @@ namespace AndBurn.DDSReader
 						format = Utils.PixelFormat.UNKNOWN;
 						blocksize *= 16;
 						break;
-				} // switch
+				}
 			}
 			else
 			{
@@ -310,7 +323,7 @@ namespace AndBurn.DDSReader
 				{
 					if((header.pixelformat.flags & Helper.DDPF_ALPHAPIXELS) == Helper.DDPF_ALPHAPIXELS)
 					{
-						format = Utils.PixelFormat.ARGB;
+						format = Utils.PixelFormat.RGBA;
 					}
 					else
 					{
