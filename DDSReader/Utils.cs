@@ -150,7 +150,9 @@ namespace AndBurn.DDSReader.Utils
 		internal static void ComputeMaskParams(uint mask, ref int shift1, ref int mul, ref int shift2)
 		{
 			shift1 = 0; mul = 1; shift2 = 0;
-			while((mask & 1) == 0)
+			if (mask == 0 || mask == uint.MaxValue)
+				return;
+			while ((mask & 1) == 0)
 			{
 				mask >>= 1;
 				shift1++;
@@ -441,5 +443,15 @@ namespace AndBurn.DDSReader.Utils
 		G32R32F,
 		A32B32G32R32F,
 		UNKNOWN
+	}
+
+	public class TestHelper
+	{
+		public static int[] ComputeMaskParams(uint mask)
+		{
+			int rShift1 = 0; int rMul = 0; int rShift2 = 0;
+			Helper.ComputeMaskParams(mask, ref rShift1, ref rMul, ref rShift2);
+			return new int[] { rShift1, rMul, rShift2 };
+		}
 	}
 }
