@@ -6,7 +6,7 @@
     <ProjectGuid>{B2AE5D7D-6E82-41B6-A66B-97C022CD909B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>me.andburn.DDSReaderTest</RootNamespace>
+    <RootNamespace>Graphics.Tests.DDSReaderTest</RootNamespace>
     <AssemblyName>DDSReaderTest</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

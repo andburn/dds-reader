@@ -1,9 +1,9 @@
 ﻿using System.Drawing;
 using System.IO;
-using AndBurn.DDSReader;
+using Imaging.DDSReader;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace AndBurn.DDSReaderTest
+namespace Imaging.Tests.DDSReaderTest
 {
 	// Some simple tests, to check setup
 	[TestClass]

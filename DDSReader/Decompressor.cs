@@ -1,7 +1,7 @@
 ﻿using System;
-using AndBurn.DDSReader.Utils;
+using Imaging.DDSReader.Utils;
 
-namespace AndBurn.DDSReader
+namespace Imaging.DDSReader
 {
 	internal class Decompressor
 	{
@@ -11,7 +11,7 @@ namespace AndBurn.DDSReader
 			// allocate bitmap
 			byte[] rawData = null;
 
-			switch(pixelFormat)
+			switch (pixelFormat)
 			{
 				case PixelFormat.RGBA:
 					rawData = DecompressRGBA(header, data, pixelFormat);
@@ -95,11 +95,11 @@ namespace AndBurn.DDSReader
 			fixed (byte* bytePtr = data)
 			{
 				byte* temp = bytePtr;
-				for(int z = 0; z < depth; z++)
+				for (int z = 0; z < depth; z++)
 				{
-					for(int y = 0; y < height; y += 4)
+					for (int y = 0; y < height; y += 4)
 					{
-						for(int x = 0; x < width; x += 4)
+						for (int x = 0; x < width; x += 4)
 						{
 							ushort colour0 = *((ushort*)temp);
 							ushort colour1 = *((ushort*)(temp + 2));
@@ -109,7 +109,7 @@ namespace AndBurn.DDSReader
 							uint bitmask = ((uint*)temp)[1];
 							temp += 8;
 
-							if(colour0 > colour1)
+							if (colour0 > colour1)
 							{
 								// Four-color block: derive the other two colors.
 								// 00 = color_0, 01 = color_1, 10 = color_2, 11 = color_3
@@ -143,13 +143,13 @@ namespace AndBurn.DDSReader
 								colours[3].alpha = 0x00;
 							}
 
-							for(int j = 0, k = 0; j < 4; j++)
+							for (int j = 0, k = 0; j < 4; j++)
 							{
-								for(int i = 0; i < 4; i++, k++)
+								for (int i = 0; i < 4; i++, k++)
 								{
 									int select = (int)((bitmask & (0x03 << k * 2)) >> k * 2);
 									Colour8888 col = colours[select];
-									if(((x + i) < width) && ((y + j) < height))
+									if (((x + i) < width) && ((y + j) < height))
 									{
 										uint offset = (uint)(z * sizeofplane + (y + j) * bps + (x + i) * bpp);
 										rawData[offset + 0] = (byte)col.red;
@@ -199,11 +199,11 @@ namespace AndBurn.DDSReader
 			fixed (byte* bytePtr = data)
 			{
 				byte* temp = bytePtr;
-				for(int z = 0; z < depth; z++)
+				for (int z = 0; z < depth; z++)
 				{
-					for(int y = 0; y < height; y += 4)
+					for (int y = 0; y < height; y += 4)
 					{
-						for(int x = 0; x < width; x += 4)
+						for (int x = 0; x < width; x += 4)
 						{
 							byte* alpha = temp;
 							temp += 8;
@@ -228,13 +228,13 @@ namespace AndBurn.DDSReader
 							colours[3].red = (byte)((colours[0].red + 2 * colours[1].red + 1) / 3);
 							//colours[3].alpha = 0xFF;
 
-							for(int j = 0, k = 0; j < 4; j++)
+							for (int j = 0, k = 0; j < 4; j++)
 							{
-								for(int i = 0; i < 4; k++, i++)
+								for (int i = 0; i < 4; k++, i++)
 								{
 									int select = (int)((bitmask & (0x03 << k * 2)) >> k * 2);
 
-									if(((x + i) < width) && ((y + j) < height))
+									if (((x + i) < width) && ((y + j) < height))
 									{
 										uint offset = (uint)(z * sizeofplane + (y + j) * bps + (x + i) * bpp);
 										rawData[offset + 0] = (byte)colours[select].red;
@@ -244,13 +244,13 @@ namespace AndBurn.DDSReader
 								}
 							}
 
-							for(int j = 0; j < 4; j++)
+							for (int j = 0; j < 4; j++)
 							{
 								//ushort word = (ushort)(alpha[2 * j] + 256 * alpha[2 * j + 1]);
 								ushort word = (ushort)(alpha[2 * j] | (alpha[2 * j + 1] << 8));
-								for(int i = 0; i < 4; i++)
+								for (int i = 0; i < 4; i++)
 								{
-									if(((x + i) < width) && ((y + j) < height))
+									if (((x + i) < width) && ((y + j) < height))
 									{
 										uint offset = (uint)(z * sizeofplane + (y + j) * bps + (x + i) * bpp + 3);
 										rawData[offset] = (byte)(word & 0x0F);
@@ -298,13 +298,13 @@ namespace AndBurn.DDSReader
 			fixed (byte* bytePtr = data)
 			{
 				byte* temp = bytePtr;
-				for(int z = 0; z < depth; z++)
+				for (int z = 0; z < depth; z++)
 				{
-					for(int y = 0; y < height; y += 4)
+					for (int y = 0; y < height; y += 4)
 					{
-						for(int x = 0; x < width; x += 4)
+						for (int x = 0; x < width; x += 4)
 						{
-							if(y >= height || x >= width)
+							if (y >= height || x >= width)
 								break;
 
 							alphas[0] = temp[0];
@@ -331,14 +331,14 @@ namespace AndBurn.DDSReader
 							//colours[3].alpha = 0xFF;
 
 							int k = 0;
-							for(int j = 0; j < 4; j++)
+							for (int j = 0; j < 4; j++)
 							{
-								for(int i = 0; i < 4; k++, i++)
+								for (int i = 0; i < 4; k++, i++)
 								{
 									int select = (int)((bitmask & (0x03 << k * 2)) >> k * 2);
 									Colour8888 col = colours[select];
 									// only put pixels out < width or height
-									if(((x + i) < width) && ((y + j) < height))
+									if (((x + i) < width) && ((y + j) < height))
 									{
 										uint offset = (uint)(z * sizeofplane + (y + j) * bps + (x + i) * bpp);
 										rawData[offset] = (byte)col.red;
@@ -349,7 +349,7 @@ namespace AndBurn.DDSReader
 							}
 
 							// 8-alpha or 6-alpha block?
-							if(alphas[0] > alphas[1])
+							if (alphas[0] > alphas[1])
 							{
 								// 8-alpha block:  derive the other six alphas.
 								// Bit code 000 = alpha_0, 001 = alpha_1, others are interpolated.
@@ -378,12 +378,12 @@ namespace AndBurn.DDSReader
 							// First three bytes
 							//uint bits = (uint)(alphamask[0]);
 							uint bits = (uint)((alphamask[0]) | (alphamask[1] << 8) | (alphamask[2] << 16));
-							for(int j = 0; j < 2; j++)
+							for (int j = 0; j < 2; j++)
 							{
-								for(int i = 0; i < 4; i++)
+								for (int i = 0; i < 4; i++)
 								{
 									// only put pixels out < width or height
-									if(((x + i) < width) && ((y + j) < height))
+									if (((x + i) < width) && ((y + j) < height))
 									{
 										uint offset = (uint)(z * sizeofplane + (y + j) * bps + (x + i) * bpp + 3);
 										rawData[offset] = (byte)alphas[bits & 0x07];
@@ -395,12 +395,12 @@ namespace AndBurn.DDSReader
 							// Last three bytes
 							//bits = (uint)(alphamask[3]);
 							bits = (uint)((alphamask[3]) | (alphamask[4] << 8) | (alphamask[5] << 16));
-							for(int j = 2; j < 4; j++)
+							for (int j = 2; j < 4; j++)
 							{
-								for(int i = 0; i < 4; i++)
+								for (int i = 0; i < 4; i++)
 								{
 									// only put pixels out < width or height
-									if(((x + i) < width) && ((y + j) < height))
+									if (((x + i) < width) && ((y + j) < height))
 									{
 										uint offset = (uint)(z * sizeofplane + (y + j) * bps + (x + i) * bpp + 3);
 										rawData[offset] = (byte)alphas[bits & 0x07];
@@ -442,7 +442,7 @@ namespace AndBurn.DDSReader
 			fixed (byte* bytePtr = data)
 			{
 				byte* temp = bytePtr;
-				while(pixnum-- > 0)
+				while (pixnum-- > 0)
 				{
 					uint px = *((uint*)temp) & valMask;
 					temp += pixSize;
@@ -489,7 +489,7 @@ namespace AndBurn.DDSReader
 			{
 				byte* temp = bytePtr;
 
-				while(pixnum-- > 0)
+				while (pixnum-- > 0)
 				{
 					uint px = *((uint*)temp) & valMask;
 					temp += pixSize;
@@ -525,11 +525,11 @@ namespace AndBurn.DDSReader
 			fixed (byte* bytePtr = data)
 			{
 				byte* temp = bytePtr;
-				for(int z = 0; z < depth; z++)
+				for (int z = 0; z < depth; z++)
 				{
-					for(int y = 0; y < height; y += 4)
+					for (int y = 0; y < height; y += 4)
 					{
-						for(int x = 0; x < width; x += 4)
+						for (int x = 0; x < width; x += 4)
 						{
 							byte* temp2 = temp + 8;
 
@@ -537,12 +537,12 @@ namespace AndBurn.DDSReader
 							int t1 = yColours[0] = temp[0];
 							int t2 = yColours[1] = temp[1];
 							temp += 2;
-							if(t1 > t2)
-								for(int i = 2; i < 8; ++i)
+							if (t1 > t2)
+								for (int i = 2; i < 8; ++i)
 									yColours[i] = (byte)(t1 + ((t2 - t1) * (i - 1)) / 7);
 							else
 							{
-								for(int i = 2; i < 6; ++i)
+								for (int i = 2; i < 6; ++i)
 									yColours[i] = (byte)(t1 + ((t2 - t1) * (i - 1)) / 5);
 								yColours[6] = 0;
 								yColours[7] = 255;
@@ -552,12 +552,12 @@ namespace AndBurn.DDSReader
 							t1 = xColours[0] = temp2[0];
 							t2 = xColours[1] = temp2[1];
 							temp2 += 2;
-							if(t1 > t2)
-								for(int i = 2; i < 8; ++i)
+							if (t1 > t2)
+								for (int i = 2; i < 8; ++i)
 									xColours[i] = (byte)(t1 + ((t2 - t1) * (i - 1)) / 7);
 							else
 							{
-								for(int i = 2; i < 6; ++i)
+								for (int i = 2; i < 6; ++i)
 									xColours[i] = (byte)(t1 + ((t2 - t1) * (i - 1)) / 5);
 								xColours[6] = 0;
 								xColours[7] = 255;
@@ -565,20 +565,20 @@ namespace AndBurn.DDSReader
 
 							//decompress pixel data
 							int currentOffset = offset;
-							for(int k = 0; k < 4; k += 2)
+							for (int k = 0; k < 4; k += 2)
 							{
 								// First three bytes
 								uint bitmask = ((uint)(temp[0]) << 0) | ((uint)(temp[1]) << 8) | ((uint)(temp[2]) << 16);
 								uint bitmask2 = ((uint)(temp2[0]) << 0) | ((uint)(temp2[1]) << 8) | ((uint)(temp2[2]) << 16);
-								for(int j = 0; j < 2; j++)
+								for (int j = 0; j < 2; j++)
 								{
 									// only put pixels out < height
-									if((y + k + j) < height)
+									if ((y + k + j) < height)
 									{
-										for(int i = 0; i < 4; i++)
+										for (int i = 0; i < 4; i++)
 										{
 											// only put pixels out < width
-											if(((x + i) < width))
+											if (((x + i) < width))
 											{
 												int t;
 												byte tx, ty;
@@ -589,7 +589,7 @@ namespace AndBurn.DDSReader
 
 												//calculate b (z) component ((r/255)^2 + (g/255)^2 + (b/255)^2 = 1
 												t = 127 * 128 - (tx - 127) * (tx - 128) - (ty - 127) * (ty - 128);
-												if(t > 0)
+												if (t > 0)
 													rawData[t1 + 2] = (byte)(Math.Sqrt(t) + 128);
 												else
 													rawData[t1 + 2] = 0x7F;
@@ -632,22 +632,22 @@ namespace AndBurn.DDSReader
 			fixed (byte* bytePtr = data)
 			{
 				byte* temp = bytePtr;
-				for(int z = 0; z < depth; z++)
+				for (int z = 0; z < depth; z++)
 				{
-					for(int y = 0; y < height; y += 4)
+					for (int y = 0; y < height; y += 4)
 					{
-						for(int x = 0; x < width; x += 4)
+						for (int x = 0; x < width; x += 4)
 						{
 							//Read palette
 							int t1 = colours[0] = temp[0];
 							int t2 = colours[1] = temp[1];
 							temp += 2;
-							if(t1 > t2)
-								for(int i = 2; i < 8; ++i)
+							if (t1 > t2)
+								for (int i = 2; i < 8; ++i)
 									colours[i] = (byte)(t1 + ((t2 - t1) * (i - 1)) / 7);
 							else
 							{
-								for(int i = 2; i < 6; ++i)
+								for (int i = 2; i < 6; ++i)
 									colours[i] = (byte)(t1 + ((t2 - t1) * (i - 1)) / 5);
 								colours[6] = 0;
 								colours[7] = 255;
@@ -655,19 +655,19 @@ namespace AndBurn.DDSReader
 
 							//decompress pixel data
 							uint currOffset = offset;
-							for(int k = 0; k < 4; k += 2)
+							for (int k = 0; k < 4; k += 2)
 							{
 								// First three bytes
 								uint bitmask = ((uint)(temp[0]) << 0) | ((uint)(temp[1]) << 8) | ((uint)(temp[2]) << 16);
-								for(int j = 0; j < 2; j++)
+								for (int j = 0; j < 2; j++)
 								{
 									// only put pixels out < height
-									if((y + k + j) < height)
+									if ((y + k + j) < height)
 									{
-										for(int i = 0; i < 4; i++)
+										for (int i = 0; i < 4; i++)
 										{
 											// only put pixels out < width
-											if(((x + i) < width))
+											if (((x + i) < width))
 											{
 												t1 = (int)(currOffset + (x + i));
 												rawData[t1] = colours[bitmask & 0x07];
@@ -707,7 +707,7 @@ namespace AndBurn.DDSReader
 			fixed (byte* bytePtr = data)
 			{
 				byte* temp = bytePtr;
-				while(pixnum-- > 0)
+				while (pixnum-- > 0)
 				{
 					byte px = *(temp++);
 					rawData[offset + 0] = (byte)(((px >> lShift1) * lMul) >> lShift2);
@@ -740,13 +740,13 @@ namespace AndBurn.DDSReader
 			fixed (byte* bytePtr = data)
 			{
 				byte* temp = bytePtr;
-				for(int z = 0; z < depth; z++)
+				for (int z = 0; z < depth; z++)
 				{
-					for(int y = 0; y < height; y += 4)
+					for (int y = 0; y < height; y += 4)
 					{
-						for(int x = 0; x < width; x += 4)
+						for (int x = 0; x < width; x += 4)
 						{
-							if(y >= height || x >= width)
+							if (y >= height || x >= width)
 								break;
 							alphas[0] = temp[0];
 							alphas[1] = temp[1];
@@ -784,15 +784,15 @@ namespace AndBurn.DDSReader
 							colours[3].alpha = 0xFF;
 
 							int k = 0;
-							for(int j = 0; j < 4; j++)
+							for (int j = 0; j < 4; j++)
 							{
-								for(int i = 0; i < 4; i++, k++)
+								for (int i = 0; i < 4; i++, k++)
 								{
 									int select = (int)((bitmask & (0x03 << k * 2)) >> k * 2);
 									Colour8888 col = colours[select];
 
 									// only put pixels out < width or height
-									if(((x + i) < width) && ((y + j) < height))
+									if (((x + i) < width) && ((y + j) < height))
 									{
 										uint offset = (uint)(z * sizeofplane + (y + j) * bps + (x + i) * bpp);
 										rawData[offset + 0] = col.red;
@@ -803,7 +803,7 @@ namespace AndBurn.DDSReader
 							}
 
 							// 8-alpha or 6-alpha block?
-							if(alphas[0] > alphas[1])
+							if (alphas[0] > alphas[1])
 							{
 								// 8-alpha block:  derive the other six alphas.
 								// Bit code 000 = alpha_0, 001 = alpha_1, others are interpolated.
@@ -830,12 +830,12 @@ namespace AndBurn.DDSReader
 							//	it operates on a 6-byte system.
 							// First three bytes
 							uint bits = *((uint*)alphamask);
-							for(int j = 0; j < 2; j++)
+							for (int j = 0; j < 2; j++)
 							{
-								for(int i = 0; i < 4; i++)
+								for (int i = 0; i < 4; i++)
 								{
 									// only put pixels out < width or height
-									if(((x + i) < width) && ((y + j) < height))
+									if (((x + i) < width) && ((y + j) < height))
 									{
 										uint offset = (uint)(z * sizeofplane + (y + j) * bps + (x + i) * bpp + 3);
 										rawData[offset] = alphas[bits & 0x07];
@@ -846,12 +846,12 @@ namespace AndBurn.DDSReader
 
 							// Last three bytes
 							bits = *((uint*)&alphamask[3]);
-							for(int j = 2; j < 4; j++)
+							for (int j = 2; j < 4; j++)
 							{
-								for(int i = 0; i < 4; i++)
+								for (int i = 0; i < 4; i++)
 								{
 									// only put pixels out < width or height
-									if(((x + i) < width) && ((y + j) < height))
+									if (((x + i) < width) && ((y + j) < height))
 									{
 										uint offset = (uint)(z * sizeofplane + (y + j) * bps + (x + i) * bpp + 3);
 										rawData[offset] = alphas[bits & 0x07];
@@ -884,11 +884,11 @@ namespace AndBurn.DDSReader
 				fixed (byte* destPtr = rawData)
 				{
 					byte* destData = destPtr;
-					switch(pixelFormat)
+					switch (pixelFormat)
 					{
 						case PixelFormat.R32F:  // Red float, green = blue = max
 							size = width * height * depth * 3;
-							for(int i = 0, j = 0; i < size; i += 3, j++)
+							for (int i = 0, j = 0; i < size; i += 3, j++)
 							{
 								((float*)destData)[i] = ((float*)temp)[j];
 								((float*)destData)[i + 1] = 1.0f;
@@ -902,7 +902,7 @@ namespace AndBurn.DDSReader
 
 						case PixelFormat.G32R32F:  // Red float, green float, blue = max
 							size = width * height * depth * 3;
-							for(int i = 0, j = 0; i < size; i += 3, j += 2)
+							for (int i = 0, j = 0; i < size; i += 3, j += 2)
 							{
 								((float*)destData)[i] = ((float*)temp)[j];
 								((float*)destData)[i + 1] = ((float*)temp)[j + 1];

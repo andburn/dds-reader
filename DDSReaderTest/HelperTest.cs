@@ -1,10 +1,7 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using Imaging.DDSReader.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AndBurn.DDSReader.Utils;
 
-namespace me.andburn.DDSReaderTest
+namespace Imaging.Tests.DDSReaderTest
 {
 	[TestClass]
 	public class HelperTest

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace AndBurn.DDSReader.Utils
+namespace Imaging.DDSReader.Utils
 {
 	public class Helper
 	{
@@ -61,7 +61,7 @@ namespace AndBurn.DDSReader.Utils
 		// iCompFormatToBpp
 		internal static uint PixelFormatToBpp(PixelFormat pf, uint rgbbitcount)
 		{
-			switch(pf)
+			switch (pf)
 			{
 				case PixelFormat.LUMINANCE:
 				case PixelFormat.LUMINANCE_ALPHA:
@@ -95,7 +95,7 @@ namespace AndBurn.DDSReader.Utils
 		// iCompFormatToBpc
 		internal static uint PixelFormatToBpc(PixelFormat pf)
 		{
-			switch(pf)
+			switch (pf)
 			{
 				case PixelFormat.R16F:
 				case PixelFormat.G16R16F:
@@ -117,14 +117,14 @@ namespace AndBurn.DDSReader.Utils
 
 		internal static bool Check16BitComponents(DDSStruct header)
 		{
-			if(header.pixelformat.rgbbitcount != 32)
+			if (header.pixelformat.rgbbitcount != 32)
 				return false;
 			// a2b10g10r10 format
-			if(header.pixelformat.rbitmask == 0x3FF00000 && header.pixelformat.gbitmask == 0x000FFC00 && header.pixelformat.bbitmask == 0x000003FF
+			if (header.pixelformat.rbitmask == 0x3FF00000 && header.pixelformat.gbitmask == 0x000FFC00 && header.pixelformat.bbitmask == 0x000003FF
 				&& header.pixelformat.alphabitmask == 0xC0000000)
 				return true;
 			// a2r10g10b10 format
-			else if(header.pixelformat.rbitmask == 0x000003FF && header.pixelformat.gbitmask == 0x000FFC00 && header.pixelformat.bbitmask == 0x3FF00000
+			else if (header.pixelformat.rbitmask == 0x000003FF && header.pixelformat.gbitmask == 0x000FFC00 && header.pixelformat.bbitmask == 0x3FF00000
 				&& header.pixelformat.alphabitmask == 0xC0000000)
 				return true;
 
@@ -133,10 +133,10 @@ namespace AndBurn.DDSReader.Utils
 
 		internal static void CorrectPremult(uint pixnum, ref byte[] buffer)
 		{
-			for(uint i = 0; i < pixnum; i++)
+			for (uint i = 0; i < pixnum; i++)
 			{
 				byte alpha = buffer[i + 3];
-				if(alpha == 0) continue;
+				if (alpha == 0) continue;
 				int red = (buffer[i] << 8) / alpha;
 				int green = (buffer[i + 1] << 8) / alpha;
 				int blue = (buffer[i + 2] << 8) / alpha;
@@ -158,12 +158,12 @@ namespace AndBurn.DDSReader.Utils
 				shift1++;
 			}
 			uint bc = 0;
-			while((mask & (1 << (int)bc)) != 0) bc++;
-			while((mask * mul) < 255)
+			while ((mask & (1 << (int)bc)) != 0) bc++;
+			while ((mask * mul) < 255)
 				mul = (mul << (int)bc) + 1;
 			mask *= (uint)mul;
 
-			while((mask & ~0xff) != 0)
+			while ((mask & ~0xff) != 0)
 			{
 				mask >>= 1;
 				shift2++;
@@ -219,24 +219,24 @@ namespace AndBurn.DDSReader.Utils
 		{
 			uint temp, i;
 
-			if(mask == 0)
+			if (mask == 0)
 			{
 				shiftLeft = shiftRight = 0;
 				return;
 			}
 
 			temp = mask;
-			for(i = 0; i < 32; i++, temp >>= 1)
+			for (i = 0; i < 32; i++, temp >>= 1)
 			{
-				if((temp & 1) != 0)
+				if ((temp & 1) != 0)
 					break;
 			}
 			shiftRight = i;
 
 			// Temp is preserved, so use it again:
-			for(i = 0; i < 8; i++, temp >>= 1)
+			for (i = 0; i < 8; i++, temp >>= 1)
 			{
-				if((temp & 1) == 0)
+				if ((temp & 1) == 0)
 					break;
 			}
 			shiftLeft = 8 - i;
@@ -248,15 +248,15 @@ namespace AndBurn.DDSReader.Utils
 			uint i, testBit = 0x01, count = 0;
 			bool foundBit = false;
 
-			for(i = 0; i < 32; i++, testBit <<= 1)
+			for (i = 0; i < 32; i++, testBit <<= 1)
 			{
-				if((mask & testBit) != 0)
+				if ((mask & testBit) != 0)
 				{
-					if(!foundBit)
+					if (!foundBit)
 						foundBit = true;
 					count++;
 				}
-				else if(foundBit)
+				else if (foundBit)
 					return count;
 			}
 
@@ -269,9 +269,9 @@ namespace AndBurn.DDSReader.Utils
 			int e = (y >> 10) & 0x0000001f;
 			int m = y & 0x000003ff;
 
-			if(e == 0)
+			if (e == 0)
 			{
-				if(m == 0)
+				if (m == 0)
 				{
 					//
 					// Plus or minus zero
@@ -283,7 +283,7 @@ namespace AndBurn.DDSReader.Utils
 					//
 					// Denormalized number -- renormalize it
 					//
-					while((m & 0x00000400) == 0)
+					while ((m & 0x00000400) == 0)
 					{
 						m <<= 1;
 						e -= 1;
@@ -293,9 +293,9 @@ namespace AndBurn.DDSReader.Utils
 					m &= ~0x00000400;
 				}
 			}
-			else if(e == 31)
+			else if (e == 31)
 			{
-				if(m == 0)
+				if (m == 0)
 				{
 					//
 					// Positive or negative infinity
@@ -326,7 +326,7 @@ namespace AndBurn.DDSReader.Utils
 		internal static unsafe void ConvFloat16ToFloat32(uint* dest, ushort* src, uint size)
 		{
 			uint i;
-			for(i = 0; i < size; ++i, ++dest, ++src)
+			for (i = 0; i < size; ++i, ++dest, ++src)
 			{
 				//float: 1 sign bit, 8 exponent bits, 23 mantissa bits
 				//half: 1 sign bit, 5 exponent bits, 10 mantissa bits
@@ -337,7 +337,7 @@ namespace AndBurn.DDSReader.Utils
 		internal static unsafe void ConvG16R16ToFloat32(uint* dest, ushort* src, uint size)
 		{
 			uint i;
-			for(i = 0; i < size; i += 3)
+			for (i = 0; i < size; i += 3)
 			{
 				//float: 1 sign bit, 8 exponent bits, 23 mantissa bits
 				//half: 1 sign bit, 5 exponent bits, 10 mantissa bits
@@ -350,7 +350,7 @@ namespace AndBurn.DDSReader.Utils
 		internal static unsafe void ConvR16ToFloat32(uint* dest, ushort* src, uint size)
 		{
 			uint i;
-			for(i = 0; i < size; i += 3)
+			for (i = 0; i < size; i += 3)
 			{
 				//float: 1 sign bit, 8 exponent bits, 23 mantissa bits
 				//half: 1 sign bit, 5 exponent bits, 10 mantissa bits

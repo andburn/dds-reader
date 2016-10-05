@@ -2,7 +2,7 @@ using System;
 using System.Drawing;
 using System.IO;
 
-namespace AndBurn.DDSReader
+namespace Imaging.DDSReader
 {
 	/// <summary>
 	/// This is the main class of the library.  All static methods are contained within.

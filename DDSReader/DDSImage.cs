@@ -1,9 +1,9 @@
 using System;
 using System.Drawing.Imaging;
 using System.IO;
-using AndBurn.DDSReader.Utils;
+using Imaging.DDSReader.Utils;
 
-namespace AndBurn.DDSReader
+namespace Imaging.DDSReader
 {
 	public class DDSImage : IDisposable
 	{
@@ -29,20 +29,20 @@ namespace AndBurn.DDSReader
 
 		public DDSImage(byte[] ddsImage, bool preserveAlpha = true)
 		{
-			if(ddsImage == null)
+			if (ddsImage == null)
 				return;
 
-			if(ddsImage.Length == 0)
+			if (ddsImage.Length == 0)
 				return;
 
 			_alpha = preserveAlpha;
 
-			using(MemoryStream stream = new MemoryStream(ddsImage.Length))
+			using (MemoryStream stream = new MemoryStream(ddsImage.Length))
 			{
 				stream.Write(ddsImage, 0, ddsImage.Length);
 				stream.Seek(0, SeekOrigin.Begin);
 
-				using(BinaryReader reader = new BinaryReader(stream))
+				using (BinaryReader reader = new BinaryReader(stream))
 				{
 					Parse(reader);
 				}
@@ -51,15 +51,15 @@ namespace AndBurn.DDSReader
 
 		public DDSImage(Stream ddsImage, bool preserveAlpha = true)
 		{
-			if(ddsImage == null)
+			if (ddsImage == null)
 				return;
 
-			if(!ddsImage.CanRead)
+			if (!ddsImage.CanRead)
 				return;
 
 			_alpha = preserveAlpha;
 
-			using(BinaryReader reader = new BinaryReader(ddsImage))
+			using (BinaryReader reader = new BinaryReader(ddsImage))
 			{
 				Parse(reader);
 			}
@@ -67,7 +67,7 @@ namespace AndBurn.DDSReader
 
 		public void Dispose()
 		{
-			if(_bitmap != null)
+			if (_bitmap != null)
 			{
 				_bitmap.Dispose();
 				_bitmap = null;
@@ -80,21 +80,21 @@ namespace AndBurn.DDSReader
 			Utils.PixelFormat pixelFormat = Utils.PixelFormat.UNKNOWN;
 			byte[] data = null;
 
-			if(ReadHeader(reader, ref header))
+			if (ReadHeader(reader, ref header))
 			{
 				_isValid = true;
 				// patches for stuff
-				if(header.depth == 0) header.depth = 1;
+				if (header.depth == 0) header.depth = 1;
 
 				uint blocksize = 0;
 				pixelFormat = GetFormat(header, ref blocksize);
-				if(pixelFormat == Utils.PixelFormat.UNKNOWN)
+				if (pixelFormat == Utils.PixelFormat.UNKNOWN)
 				{
 					throw new InvalidFileHeaderException();
 				}
 
 				data = ReadData(reader, header);
-				if(data != null)
+				if (data != null)
 				{
 					byte[] rawData = Decompressor.Expand(header, data, pixelFormat);
 					_bitmap = CreateBitmap((int)header.width, (int)header.height, rawData);
@@ -107,7 +107,7 @@ namespace AndBurn.DDSReader
 			byte[] compdata = null;
 			uint compsize = 0;
 
-			if((header.flags & Helper.DDSD_LINEARSIZE) > 1)
+			if ((header.flags & Helper.DDSD_LINEARSIZE) > 1)
 			{
 				compdata = reader.ReadBytes((int)header.sizeorpitch);
 				compsize = (uint)compdata.Length;
@@ -121,9 +121,9 @@ namespace AndBurn.DDSReader
 				MemoryStream mem = new MemoryStream((int)compsize);
 
 				byte[] temp;
-				for(int z = 0; z < header.depth; z++)
+				for (int z = 0; z < header.depth; z++)
 				{
-					for(int y = 0; y < header.height; y++)
+					for (int y = 0; y < header.height; y++)
 					{
 						temp = reader.ReadBytes((int)bps);
 						mem.Write(temp, 0, temp.Length);
@@ -141,7 +141,7 @@ namespace AndBurn.DDSReader
 		private System.Drawing.Bitmap CreateBitmap(int width, int height, byte[] rawData)
 		{
 			var pxFormat = System.Drawing.Imaging.PixelFormat.Format32bppRgb;
-			if(_alpha)
+			if (_alpha)
 				pxFormat = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
 
 			System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(width, height, pxFormat);
@@ -154,7 +154,7 @@ namespace AndBurn.DDSReader
 			unsafe
 			{
 				byte* p = (byte*)scan;
-				for(int i = 0; i < size; i += 4)
+				for (int i = 0; i < size; i += 4)
 				{
 					// iterate through bytes.
 					// Bitmap stores it's data in RGBA order.
@@ -173,11 +173,11 @@ namespace AndBurn.DDSReader
 		private bool ReadHeader(BinaryReader reader, ref DDSStruct header)
 		{
 			byte[] signature = reader.ReadBytes(4);
-			if(!(signature[0] == 'D' && signature[1] == 'D' && signature[2] == 'S' && signature[3] == ' '))
+			if (!(signature[0] == 'D' && signature[1] == 'D' && signature[2] == 'S' && signature[3] == ' '))
 				return false;
 
 			header.size = reader.ReadUInt32();
-			if(header.size != 124)
+			if (header.size != 124)
 				return false;
 
 			//convert the data
@@ -190,7 +190,7 @@ namespace AndBurn.DDSReader
 			header.alphabitdepth = reader.ReadUInt32();
 
 			header.reserved = new uint[10];
-			for(int i = 0; i < 10; i++)
+			for (int i = 0; i < 10; i++)
 			{
 				header.reserved[i] = reader.ReadUInt32();
 			}
@@ -218,11 +218,11 @@ namespace AndBurn.DDSReader
 		private Utils.PixelFormat GetFormat(DDSStruct header, ref uint blocksize)
 		{
 			Utils.PixelFormat format = Utils.PixelFormat.UNKNOWN;
-			if((header.pixelformat.flags & Helper.DDPF_FOURCC) == Helper.DDPF_FOURCC)
+			if ((header.pixelformat.flags & Helper.DDPF_FOURCC) == Helper.DDPF_FOURCC)
 			{
 				blocksize = ((header.width + 3) / 4) * ((header.height + 3) / 4) * header.depth;
 
-				switch(header.pixelformat.fourcc)
+				switch (header.pixelformat.fourcc)
 				{
 					case Helper.FOURCC_DXT1:
 						format = Utils.PixelFormat.DXT1;
@@ -308,9 +308,9 @@ namespace AndBurn.DDSReader
 			else
 			{
 				// uncompressed image
-				if((header.pixelformat.flags & Helper.DDPF_LUMINANCE) == Helper.DDPF_LUMINANCE)
+				if ((header.pixelformat.flags & Helper.DDPF_LUMINANCE) == Helper.DDPF_LUMINANCE)
 				{
-					if((header.pixelformat.flags & Helper.DDPF_ALPHAPIXELS) == Helper.DDPF_ALPHAPIXELS)
+					if ((header.pixelformat.flags & Helper.DDPF_ALPHAPIXELS) == Helper.DDPF_ALPHAPIXELS)
 					{
 						format = Utils.PixelFormat.LUMINANCE_ALPHA;
 					}
@@ -321,7 +321,7 @@ namespace AndBurn.DDSReader
 				}
 				else
 				{
-					if((header.pixelformat.flags & Helper.DDPF_ALPHAPIXELS) == Helper.DDPF_ALPHAPIXELS)
+					if ((header.pixelformat.flags & Helper.DDPF_ALPHAPIXELS) == Helper.DDPF_ALPHAPIXELS)
 					{
 						format = Utils.PixelFormat.RGBA;
 					}
