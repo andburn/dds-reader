@@ -59,5 +59,12 @@ namespace Imaging.Tests.DDSReaderTest
 			Bitmap bmp = DDS.LoadImage(@"Data\sample.bmp");
 			Assert.IsNull(bmp);
 		}
+
+		[TestMethod]
+		public void SampleTest()
+		{
+			Bitmap bmp = DDS.LoadImage(@"Data\error.dds");
+			Assert.IsNotNull(bmp);
+		}
 	}
 }
