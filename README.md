@@ -12,6 +12,11 @@ Bitmap bmp = DDS.LoadImage(@".\textures\sample.dds");
 ```
 Overloaded versions of `LoadImage` exist to load from a `byte` array as well as from a `Stream`.
 
+## Supported Formats
+Supports DXTn formats only (DXT1, DXT2, DXT3, DXT4, DXT5).
+
+There are no plans to add support for any other formats at this time, but pull requests are always welcome.
+
 ----
 ### Original Readme
 
