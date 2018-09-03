@@ -23,23 +23,25 @@ namespace DDSReader
 		public DDSImage(string file)
 		{
 			_image = Pfim.Pfim.FromFile(file);
-			Decompress();
+			Process();
 		}
 
 		public DDSImage(Stream stream)
 		{
 			if (stream == null)
-				throw new Exception("Null Stream");
+				throw new Exception("DDSImage ctor: Stream is null");
 
 			_image = Pfim.Dds.Create(stream, new Pfim.PfimConfig());
+			Process();
 		}
 
 		public DDSImage(byte[] data)
 		{
 			if (data == null || data.Length <= 0)
-				throw new Exception("Empty Data");
+				throw new Exception("DDSImage ctor: no data");
 
 			_image = Pfim.Dds.Create(data, new Pfim.PfimConfig());
+			Process();
 		}
 
 		public void Save(string file)
@@ -49,12 +51,15 @@ namespace DDSReader
 			else if (_image.Format == Pfim.ImageFormat.Rgb24)
 				Save<Rgb24>(file);
 			else
-				throw new Exception("Unsupported pixel format");
+				throw new Exception("Unsupported pixel format (" + _image.Format + ")");
 		}
 
-		private void Decompress()
+		private void Process()
 		{
-			if (_image != null && _image.Compressed)
+			if (_image == null)
+				throw new Exception("DDSImage image creation failed");
+
+			if (_image.Compressed)
 				_image.Decompress();
 		}
 
