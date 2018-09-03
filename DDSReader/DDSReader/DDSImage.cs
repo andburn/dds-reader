@@ -32,7 +32,6 @@ namespace DDSReader
 				throw new Exception("Null Stream");
 
 			_image = Pfim.Dds.Create(stream, new Pfim.PfimConfig());
-			Decompress();
 		}
 
 		public DDSImage(byte[] data)
@@ -41,7 +40,6 @@ namespace DDSReader
 				throw new Exception("Empty Data");
 
 			_image = Pfim.Dds.Create(data, new Pfim.PfimConfig());
-			Decompress();
 		}
 
 		public void Save(string file)
