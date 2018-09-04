@@ -47,9 +47,9 @@ namespace DDSReader
 		public void Save(string file)
 		{
 			if (_image.Format == Pfim.ImageFormat.Rgba32)
-				Save<Rgba32>(file);
+				Save<Bgra32>(file);
 			else if (_image.Format == Pfim.ImageFormat.Rgb24)
-				Save<Rgb24>(file);
+				Save<Bgr24>(file);
 			else
 				throw new Exception("Unsupported pixel format (" + _image.Format + ")");
 		}
